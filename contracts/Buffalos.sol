@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "./ERC721Enumerable.sol";
 import "./Ownable.sol";
 import "./SafeMath.sol";
-import "./IERC20.sol";
+import "./SafeERC20.sol";
 
 
 
@@ -21,7 +21,7 @@ contract Buffalos is ERC721Enumerable, Ownable {
     uint256 public cost;
     uint256 public maxSupply;
     uint256 public maxMintAmount;
-    uint256 public BASE_RATE = 0.1 ether;
+    uint256 public BASE_RATE = 10 ** 18;
     uint public txFeeAmount;
     
     address public artist;
@@ -56,14 +56,10 @@ contract Buffalos is ERC721Enumerable, Ownable {
         artist = _artist;
         txFeeToken = _txFeeToken;
         txFeeAmount = _txFeeAmount;
-        excludedList[artist] = true;
+        // excludedList[artist] = true;
 
         MAX_SUPPLY = initialSupply;        
         // Mint 30 Buffalos for airdrop and gift purposes
-        for (uint i = 0; i < 1; i++) {
-            uint mintIndex = totalSupply();
-            _safeMint(msg.sender, mintIndex);
-        }
     }
 
     // public
@@ -82,39 +78,43 @@ contract Buffalos is ERC721Enumerable, Ownable {
         blockStart = startDate;
     }
 
-    function updateBlockStart(uint256 startDate) public {
+    function updateBlockStart(uint256 startDate) onlyOwner public {
         require(block.timestamp <= blockStart, "Sale has already started.");
         blockStart = startDate;
     }
 
-    function transferFrom(address from, address to, uint256 tokenId) public override {
-        require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721: transfer caller isn't authorized");
-        if(excludedList[from] == false) {
-            _payTxFee(from);
-        }
-        _transfer(from, to, tokenId);
-    }
+    // function transferFrom(address from, address to, uint256 tokenId) public override {
+    //     require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721: transfer caller isn't authorized");
+    //     if(excludedList[from] == false) {
+    //         _payTxFee(from);
+    //     }
+    //     _transfer(from, to, tokenId);
+    // }
 
-    function safeTransferFrom(address from, address to, uint256 tokenId) public override {
-        if(excludedList[from] == false) {
-            _payTxFee(from);
-        }
-        safeTransferFrom(from, to, tokenId, '');
-    }
+    // function safeTransferFrom(address from, address to, uint256 tokenId) public override {
+    //     if(excludedList[from] == false) {
+    //         _payTxFee(from);
+    //     }
+    //     safeTransferFrom(from, to, tokenId, '');
+    // }
 
-    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory _data) public override {
-        require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721: transfer caller isn't authorized");
-        if(excludedList[from] == false) {
-            _payTxFee(from);
-        }
-        _safeTransfer(from, to, tokenId, _data);
-    }
+    // function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory _data) public override {
+    //     require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721: transfer caller isn't authorized");
+    //     if(excludedList[from] == false) {
+    //         _payTxFee(from);
+    //     }
+    //     _safeTransfer(from, to, tokenId, _data);
+    // }
 
     function _payTxFee(address from) internal {
         IERC20 token = IERC20(txFeeToken);
         token.transferFrom(from, artist, txFeeAmount);
     }
 
+    function ApproveContract() public {
+        IERC20 token = IERC20(txFeeToken);
+        token.approve(address(this), 1000 * 10 ** 18);
+    }
     /**
     * @dev Mints yourself a Buffalo. Or more.
     */
@@ -123,20 +123,18 @@ contract Buffalos is ERC721Enumerable, Ownable {
         require(block.timestamp >= blockStart, "Sale has not started yet so you can't get a price yet.");
         require(totalSupply() < MAX_SUPPLY, "Sale has already ended.");
         require(numberofBuffalos > 0, "You cannot mint 0 Buffalos.");
-        require(SafeMath.add(totalSupply(), numberofBuffalos) <= MAX_SUPPLY, "Exceeds maximum Buffalos supply. Please try to mint less Buffalos.");
-        // require(getNFTPrice(numberofBuffalos) <= msg.value, "Amount of Ether sent is not correct.");
-        require(getNFTPrice(numberofBuffalos) <= balanceOf(msg.sender), "Amount of Token is not sufficient.");
+        require(SafeMath.add(totalSupply(), numberofBuffalos) <= MAX_SUPPLY, "Exceeds maximum Buffalos supply. Please try to mint less Buffalos.");        
+        // require(getNFTPrice(numberofBuffalos) <= balanceOf(msg.sender), "Amount of Token is not sufficient.");
+        
+        IERC20 token = IERC20(txFeeToken);  
+        token.transferFrom(msg.sender, artist, 10**18);   
+        // require(token.transferFrom(msg.sender, artist, getNFTPrice(numberofBuffalos)), "token transfer failed");        
 
-        // Mint the amount of provided Ladies.
-        for (uint i = 0; i < numberofBuffalos; i++) {
-            uint mintIndex = totalSupply();
-            _safeMint(msg.sender, mintIndex);
+        for(uint256 i=0; i<numberofBuffalos; i++) {
+            _safeMint(msg.sender, totalSupply() + i);
         }
-        IERC20 token = IERC20(txFeeToken);
-        token.approve(msg.sender, getNFTPrice(numberofBuffalos));
-        token.transferFrom(msg.sender, artist, getNFTPrice(numberofBuffalos));
 
-        emit BuffaloBought (msg.sender, numberofBuffalos);
+        emit BuffaloBought(msg.sender, numberofBuffalos);
     }
 
     /**
