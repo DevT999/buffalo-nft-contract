@@ -21,7 +21,6 @@ contract Buffalos is ERC721Enumerable, Ownable {
     uint256 public cost;
     uint256 public maxMintAmount;
     uint256 public BASE_RATE = 10 ** 18;
-    uint public txFeeAmount;
     
     address public artist;
     address public txFeeToken;
@@ -54,8 +53,8 @@ contract Buffalos is ERC721Enumerable, Ownable {
 
         artist = _artist;
         txFeeToken = _txFeeToken;
-        txFeeAmount = _txFeeAmount;
         // excludedList[artist] = true;
+        BASE_RATE = _txFeeAmount * 10 ** 15;
 
         MAX_SUPPLY = initialSupply;        
         // Mint 30 Buffalos for airdrop and gift purposes
