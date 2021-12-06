@@ -127,14 +127,14 @@ contract Buffalos is ERC721Enumerable, Ownable {
         require(totalSupply() < MAX_SUPPLY, "Sale has already ended.");
         require(numberofBuffalos > 0, "You cannot mint 0 Buffalos.");
         require(SafeMath.add(totalSupply(), numberofBuffalos) <= MAX_SUPPLY, "Exceeds maximum Buffalos supply. Please try to mint less Buffalos.");        
-        // require(getNFTPrice(numberofBuffalos) <= balanceOf(msg.sender), "Amount of Token is not sufficient.");
         
         IERC20 token = IERC20(txFeeToken);  
-        token.transferFrom(msg.sender, artist, 10**18);   
+        require(getNFTPrice(numberofBuffalos) <= token.balanceOf(msg.sender), "Amount of Token is not sufficient.");
+        token.transferFrom(msg.sender, artist, getNFTPrice(numberofBuffalos));   
         // require(token.transferFrom(msg.sender, artist, getNFTPrice(numberofBuffalos)), "token transfer failed");        
 
         for(uint256 i=0; i<numberofBuffalos; i++) {
-            _safeMint(msg.sender, totalSupply() + i);
+            _safeMint(msg.sender, totalSupply());
         }
 
         emit BuffaloBought(msg.sender, numberofBuffalos);
@@ -166,7 +166,7 @@ contract Buffalos is ERC721Enumerable, Ownable {
     }
 
     function updateMintPrice(uint256 price) onlyOwner public {
-        BASE_RATE = price;
+        BASE_RATE = price * 10 ** 15;
     }
 
     function walletOfOwner(address _owner)
