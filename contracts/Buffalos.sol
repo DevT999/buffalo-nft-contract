@@ -19,7 +19,6 @@ contract Buffalos is ERC721Enumerable, Ownable {
     // Maximum amount of Buffalos in existance. 
     uint256 public MAX_SUPPLY;
     uint256 public cost;
-    uint256 public maxSupply;
     uint256 public maxMintAmount;
     uint256 public BASE_RATE = 10 ** 18;
     uint public txFeeAmount;
@@ -28,8 +27,8 @@ contract Buffalos is ERC721Enumerable, Ownable {
     address public txFeeToken;
 
     string public baseURI;
-    string public nftName;
-    string public nftUnit;
+    // string public nftName;
+    // string public nftUnit;
     string public uri;
     string public metaDataExt = ".json";
 
@@ -81,6 +80,10 @@ contract Buffalos is ERC721Enumerable, Ownable {
     function updateBlockStart(uint256 startDate) onlyOwner public {
         require(block.timestamp <= blockStart, "Sale has already started.");
         blockStart = startDate;
+    }
+
+    function getBlockStart() public view returns (uint256)  {
+        return blockStart;
     }
 
     // function transferFrom(address from, address to, uint256 tokenId) public override {

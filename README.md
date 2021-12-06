@@ -11,3 +11,7 @@ npx hardhat compile
 # deploy 
 
 npx hardhat run scripts/deploy.js --network {network name}
+
+```or
+
+truffle migrate --reset --network {network name}
