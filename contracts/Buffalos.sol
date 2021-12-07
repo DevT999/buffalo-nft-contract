@@ -87,10 +87,10 @@ contract Buffalos is ERC721Enumerable, Ownable {
         return MAX_SUPPLY;
     }
 
-    function ApproveContract() public {
-        IERC20 token = IERC20(txFeeToken);
-        token.approve(address(this), 1000 * 10 ** 18);
-    }
+    // function ApproveContract() public {
+    //     IERC20 token = IERC20(txFeeToken);
+    //     token.approve(address(this), 1000 * 10 ** 18);
+    // }
     /**
     * @dev Mints yourself a Buffalo. Or more.
     */
