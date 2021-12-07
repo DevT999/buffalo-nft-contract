@@ -62,8 +62,6 @@ contract Buffalos is ERC721Enumerable, Ownable {
 
     // public
     function getNFTPrice(uint256 amount) public view returns (uint256) {
-        // require(block.timestamp >= blockStart, "Sale has not started yet so you can't get a price yet.");
-        // require(totalSupply() < MAX_SUPPLY, "Sale has already ended, no more Buffalos left to sell.");
         return amount.mul(BASE_RATE);
     }
 
@@ -85,32 +83,8 @@ contract Buffalos is ERC721Enumerable, Ownable {
         return blockStart;
     }
 
-    // function transferFrom(address from, address to, uint256 tokenId) public override {
-    //     require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721: transfer caller isn't authorized");
-    //     if(excludedList[from] == false) {
-    //         _payTxFee(from);
-    //     }
-    //     _transfer(from, to, tokenId);
-    // }
-
-    // function safeTransferFrom(address from, address to, uint256 tokenId) public override {
-    //     if(excludedList[from] == false) {
-    //         _payTxFee(from);
-    //     }
-    //     safeTransferFrom(from, to, tokenId, '');
-    // }
-
-    // function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory _data) public override {
-    //     require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721: transfer caller isn't authorized");
-    //     if(excludedList[from] == false) {
-    //         _payTxFee(from);
-    //     }
-    //     _safeTransfer(from, to, tokenId, _data);
-    // }
-
-    function _payTxFee(address from) internal {
-        IERC20 token = IERC20(txFeeToken);
-        token.transferFrom(from, artist, txFeeAmount);
+    function getMaxSupply() public view returns (uint256)  {
+        return MAX_SUPPLY;
     }
 
     function ApproveContract() public {
